@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Boole's Rule Calculator</title>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Source+Code+Pro:wght@400;600&family=Lato:wght@300;400;700&display=swap');
+
+    :root {
+      --bg: #0d0f1a;
+      --surface: #141728;
+      --card: #1b1f35;
+      --accent: #4fc3f7;
+      --accent2: #f06292;
+      --gold: #ffd54f;
+      --text: #e8eaf6;
+      --muted: #7986cb;
+      --success: #69f0ae;
+      --border: #2a3060;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Lato', sans-serif;
+      min-height: 100vh;
+    }
+
+    header {
+      background: linear-gradient(135deg, #0d0f1a 0%, #1a1f3e 100%);
+      border-bottom: 2px solid var(--accent);
+      padding: 2.5rem 2rem 2rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    header::before {
+      content: '';
+      position: absolute;
+      top: -60px; left: -60px;
+      width: 200px; height: 200px;
+      background: radial-gradient(circle, rgba(79,195,247,0.15), transparent 70%);
+      border-radius: 50%;
+    }
+
+    header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.8rem;
+      color: var(--accent);
+      letter-spacing: 1px;
+      text-shadow: 0 0 30px rgba(79,195,247,0.4);
+    }
+
+    header p {
+      color: var(--muted);
+      font-size: 1rem;
+      margin-top: 0.4rem;
+      font-weight: 300;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    nav {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      background: var(--surface);
+      padding: 0.8rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    nav a {
+      color: var(--muted);
+      text-decoration: none;
+      padding: 0.5rem 1.2rem;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      letter-spacing: 1px;
+      transition: all 0.2s;
+      border: 1px solid transparent;
+    }
+
+    nav a:hover, nav a.active {
+      color: var(--accent);
+      border-color: var(--accent);
+      background: rgba(79,195,247,0.08);
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+
+    section { display: none; }
+    section.active { display: block; }
+
+    /* ---- THEORY ---- */
+    .theory-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 2rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .theory-card h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.6rem;
+      color: var(--gold);
+      margin-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.5rem;
+    }
+
+    .theory-card h3 {
+      color: var(--accent);
+      margin: 1.2rem 0 0.5rem;
+      font-size: 1.05rem;
+    }
+
+    .theory-card p, .theory-card li {
+      line-height: 1.85;
+      color: #b0bec5;
+      font-size: 0.97rem;
+    }
+
+    .theory-card ul { padding-left: 1.5rem; margin-top: 0.4rem; }
+
+    .formula-box {
+      background: #0a0d1f;
+      border-left: 4px solid var(--accent);
+      border-radius: 6px;
+      padding: 1.2rem 1.5rem;
+      margin: 1rem 0;
+      font-family: 'Source Code Pro', monospace;
+      color: var(--success);
+      overflow-x: auto;
+    }
+
+    /* ---- EXAMPLES ---- */
+    .example-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 2rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .example-card h2 {
+      font-family: 'Playfair Display', serif;
+      color: var(--accent2);
+      font-size: 1.4rem;
+      margin-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.5rem;
+    }
+
+    .step-item {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      align-items: flex-start;
+    }
+
+    .step-num {
+      background: var(--accent);
+      color: #0d0f1a;
+      font-weight: 700;
+      border-radius: 50%;
+      min-width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      margin-top: 2px;
+    }
+
+    .step-content {
+      flex: 1;
+      color: #b0bec5;
+      line-height: 1.7;
+      font-size: 0.95rem;
+    }
+
+    .step-content .math-line {
+      background: #0a0d1f;
+      border-radius: 4px;
+      padding: 0.5rem 1rem;
+      margin: 0.4rem 0;
+      font-family: 'Source Code Pro', monospace;
+      color: var(--gold);
+      font-size: 0.9rem;
+    }
+
+    /* ---- CALCULATOR ---- */
+    .calc-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 2rem;
+    }
+
+    .calc-card h2 {
+      font-family: 'Playfair Display', serif;
+      color: var(--gold);
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .mode-toggle {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .mode-btn {
+      padding: 0.6rem 1.4rem;
+      border: 2px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: 'Lato', sans-serif;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+
+    .mode-btn.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(79,195,247,0.1);
+    }
+
+    .input-group {
+      margin-bottom: 1rem;
+    }
+
+    .input-group label {
+      display: block;
+      color: var(--muted);
+      font-size: 0.85rem;
+      margin-bottom: 0.4rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .input-group input {
+      width: 100%;
+      padding: 0.7rem 1rem;
+      background: #0a0d1f;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-family: 'Source Code Pro', monospace;
+      font-size: 1rem;
+      transition: border-color 0.2s;
+    }
+
+    .input-group input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .input-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 1rem;
+    }
+
+    .calc-btn {
+      margin-top: 1.2rem;
+      padding: 0.9rem 2.5rem;
+      background: linear-gradient(135deg, var(--accent), #0288d1);
+      color: #0d0f1a;
+      border: none;
+      border-radius: 6px;
+      font-family: 'Lato', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      letter-spacing: 1px;
+      transition: all 0.2s;
+    }
+
+    .calc-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(79,195,247,0.3);
+    }
+
+    .result-box {
+      margin-top: 1.5rem;
+      background: #0a0d1f;
+      border: 1px solid var(--success);
+      border-radius: 8px;
+      padding: 1.5rem;
+      display: none;
+    }
+
+    .result-box.show { display: block; }
+
+    .result-value {
+      font-family: 'Source Code Pro', monospace;
+      font-size: 1.8rem;
+      color: var(--success);
+      font-weight: 600;
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+
+    .result-steps {
+      border-top: 1px solid var(--border);
+      padding-top: 1rem;
+    }
+
+    .result-steps h4 {
+      color: var(--accent);
+      margin-bottom: 0.8rem;
+      font-size: 0.9rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .result-steps ol {
+      padding-left: 1.5rem;
+    }
+
+    .result-steps li {
+      font-family: 'Source Code Pro', monospace;
+      font-size: 0.85rem;
+      color: #90a4ae;
+      margin-bottom: 0.4rem;
+      line-height: 1.6;
+    }
+
+    .error-box {
+      margin-top: 1rem;
+      background: rgba(240,98,146,0.1);
+      border: 1px solid var(--accent2);
+      color: var(--accent2);
+      border-radius: 6px;
+      padding: 0.8rem 1rem;
+      font-size: 0.9rem;
+      display: none;
+    }
+
+    .error-box.show { display: block; }
+
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: var(--border);
+      font-size: 0.8rem;
+      border-top: 1px solid var(--border);
+      margin-top: 3rem;
+    }
+
+    @media (max-width: 600px) {
+      header h1 { font-size: 1.8rem; }
+      .input-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Boole's Rule</h1>
+  <p>Numerical Integration Calculator — PIT Project</p>
+</header>
+
+<nav>
+  <a href="#" class="active" onclick="showSection('theory', this)">Theory</a>
+  <a href="#" onclick="showSection('examples', this)">Worked Examples</a>
+  <a href="#" onclick="showSection('calculator', this)">Calculator</a>
+</nav>
+
+<div class="container">
+
+  <!-- THEORY -->
+  <section id="theory" class="active">
+    <div class="theory-card">
+      <h2>What is Boole's Rule?</h2>
+      <p>
+        Boole's Rule (also called Bode's Rule) is a numerical integration method that approximates
+        the definite integral of a function over an interval using <strong>5 equally-spaced points</strong>
+        (4 sub-intervals). It belongs to the family of Newton-Cotes closed formulas.
+      </p>
+
+      <h3>The Formula</h3>
+      <div class="formula-box">
+        \[ \int_a^b f(x)\,dx \approx \frac{2h}{45}\bigl[7f_0 + 32f_1 + 12f_2 + 32f_3 + 7f_4\bigr] \]
+      </div>
+      <p>Where:</p>
+      <ul>
+        <li>\( h = \dfrac{b-a}{4} \) — the uniform step size</li>
+        <li>\( f_i = f(x_i) \) — function values at equally-spaced points</li>
+        <li>\( x_i = a + ih \) for \( i = 0, 1, 2, 3, 4 \)</li>
+      </ul>
+
+      <h3>Derivation Idea</h3>
+      <p>
+        Boole's Rule is derived by fitting a <strong>4th-degree polynomial</strong> through the
+        5 data points and then integrating that polynomial exactly. The coefficients
+        <em>7, 32, 12, 32, 7</em> come from this polynomial integration, weighted to give
+        a total coefficient sum of 90.
+      </p>
+
+      <h3>Error Analysis</h3>
+      <div class="formula-box">
+        Error \(\approx -\dfrac{8}{945} h^7 f^{(6)}(\xi)\), \quad \xi \in [a,b]
+      </div>
+      <p>
+        The error involves the <strong>6th derivative</strong> of f, meaning Boole's Rule is
+        <em>exact</em> for polynomials of degree 5 or lower. It is significantly more accurate
+        than Simpson's Rule for the same number of points.
+      </p>
+
+      <h3>When to Use Boole's Rule</h3>
+      <ul>
+        <li>When you have exactly 4 equally-spaced intervals (5 points)</li>
+        <li>When higher accuracy than Simpson's 3/8 Rule is needed</li>
+        <li>When the integrand is smooth and well-behaved</li>
+        <li>As a building block for composite integration</li>
+      </ul>
+
+      <h3>Comparison with Other Rules</h3>
+      <ul>
+        <li><strong>Trapezoidal Rule:</strong> uses 2 points, exact for degree ≤ 1</li>
+        <li><strong>Simpson's 1/3 Rule:</strong> uses 3 points, exact for degree ≤ 3</li>
+        <li><strong>Simpson's 3/8 Rule:</strong> uses 4 points, exact for degree ≤ 3</li>
+        <li><strong>Boole's Rule:</strong> uses 5 points, exact for degree ≤ 5 ✅</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- EXAMPLES -->
+  <section id="examples">
+
+    <div class="example-card">
+      <h2>Example 1 — Integrate f(x) = x⁴ from 0 to 2</h2>
+
+      <div class="step-item">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <strong>Set up the problem.</strong><br>
+          We want to compute \(\displaystyle\int_0^2 x^4\,dx\). Using Boole's Rule with \(a=0,\; b=2\).
+        </div>
+      </div>
+
+      <div class="step-item">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <strong>Compute step size h.</strong>
+          <div class="math-line">h = (2 - 0) / 4 = 0.5</div>
+        </div>
+      </div>
+
+      <div class="step-item">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <strong>Identify x-values and compute f(xᵢ) = xᵢ⁴.</strong>
+          <div class="math-line">x₀ = 0.0 → f₀ = 0.0000</div>
+          <div class="math-line">x₁ = 0.5 → f₁ = 0.0625</div>
+          <div class="math-line">x₂ = 1.0 → f₂ = 1.0000</div>
+          <div class="math-line">x₃ = 1.5 → f₃ = 5.0625</div>
+          <div class="math-line">x₄ = 2.0 → f₄ = 16.0000</div>
+        </div>
+      </div>
+
+      <div class="step-item">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <strong>Apply Boole's Rule formula.</strong>
+          <div class="math-line">Sum = 7(0) + 32(0.0625) + 12(1) + 32(5.0625) + 7(16)</div>
+          <div class="math-line">    = 0 + 2 + 12 + 162 + 112 = 288</div>
+          <div class="math-line">Result = (2 × 0.5 / 45) × 288 = (1/45) × 288 = 6.4</div>
+        </div>
+      </div>
+
+      <div class="step-item">
+        <div class="step-num">5</div>
+        <div class="step-content">
+          <strong>Verify with exact answer.</strong>
+          <div class="math-line">∫₀² x⁴ dx = [x⁵/5]₀² = 32/5 = 6.4 ✅ Exact!</div>
+          Since f(x)=x⁴ is degree 4 ≤ 5, Boole's Rule gives the exact result.
+        </div>
+      </div>
+    </div>
+
+    <div class="example-card">
+      <h2>Example 2 — Integrate f(x) = sin(x) from 0 to π</h2>
+
+      <div class="step-item">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <strong>Set up.</strong> Compute \(\displaystyle\int_0^{\pi} \sin(x)\,dx\) with \(a=0,\;b=\pi\).
+        </div>
+      </div>
+
+      <div class="step-item">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <strong>Compute h.</strong>
+          <div class="math-line">h = (π - 0) / 4 = π/4 ≈ 0.785398</div>
+        </div>
+      </div>
+
+      <div class="step-item">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <strong>Compute f(xᵢ) = sin(xᵢ).</strong>
+          <div class="math-line">x₀ = 0        → f₀ = sin(0)    = 0.000000</div>
+          <div class="math-line">x₁ = π/4      → f₁ = sin(π/4)  = 0.707107</div>
+          <div class="math-line">x₂ = π/2      → f₂ = sin(π/2)  = 1.000000</div>
+          <div class="math-line">x₃ = 3π/4     → f₃ = sin(3π/4) = 0.707107</div>
+          <div class="math-line">x₄ = π        → f₄ = sin(π)    = 0.000000</div>
+        </div>
+      </div>
+
+      <div class="step-item">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <strong>Apply formula.</strong>
+          <div class="math-line">Sum = 7(0) + 32(0.707107) + 12(1) + 32(0.707107) + 7(0)</div>
+          <div class="math-line">    = 0 + 22.627 + 12 + 22.627 + 0 = 57.255</div>
+          <div class="math-line">Result = (2 × 0.785398 / 45) × 57.255</div>
+          <div class="math-line">       = (0.034907) × 57.255 ≈ 1.99857</div>
+        </div>
+      </div>
+
+      <div class="step-item">
+        <div class="step-num">5</div>
+        <div class="step-content">
+          <strong>Compare with exact value.</strong>
+          <div class="math-line">∫₀^π sin(x) dx = [-cos(x)]₀^π = 2.000000</div>
+          <div class="math-line">Boole's result ≈ 1.99857  |  Error ≈ 0.00143 (0.07%)</div>
+          Very high accuracy with only 5 points! ✅
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- CALCULATOR -->
+  <section id="calculator">
+    <div class="calc-card">
+      <h2>Interactive Calculator</h2>
+
+      <div class="mode-toggle">
+        <button class="mode-btn active" onclick="setMode('function', this)">Function Input</button>
+        <button class="mode-btn" onclick="setMode('manual', this)">Manual f(x) Values</button>
+      </div>
+
+      <!-- Function Mode -->
+      <div id="mode-function">
+        <div class="input-group">
+          <label>Function f(x) — use Python math syntax</label>
+          <input type="text" id="func" placeholder="e.g. x**4  or  sin(x)  or  exp(-x**2)" />
+        </div>
+        <div class="input-row">
+          <div class="input-group">
+            <label>Lower Limit a</label>
+            <input type="number" id="a" placeholder="e.g. 0" step="any"/>
+          </div>
+          <div class="input-group">
+            <label>Upper Limit b</label>
+            <input type="number" id="b" placeholder="e.g. 2" step="any"/>
+          </div>
+        </div>
+      </div>
+
+      <!-- Manual Mode -->
+      <div id="mode-manual" style="display:none">
+        <div class="input-group">
+          <label>Step size h</label>
+          <input type="number" id="h" placeholder="e.g. 0.5" step="any"/>
+        </div>
+        <div class="input-row">
+          <div class="input-group"><label>f₀</label><input type="number" id="f0" placeholder="f(x₀)" step="any"/></div>
+          <div class="input-group"><label>f₁</label><input type="number" id="f1" placeholder="f(x₁)" step="any"/></div>
+          <div class="input-group"><label>f₂</label><input type="number" id="f2" placeholder="f(x₂)" step="any"/></div>
+          <div class="input-group"><label>f₃</label><input type="number" id="f3" placeholder="f(x₃)" step="any"/></div>
+          <div class="input-group"><label>f₄</label><input type="number" id="f4" placeholder="f(x₄)" step="any"/></div>
+        </div>
+      </div>
+
+      <button class="calc-btn" onclick="calculate()">Calculate ∫</button>
+
+      <div class="error-box" id="error-box"></div>
+
+      <div class="result-box" id="result-box">
+        <div class="result-value" id="result-value"></div>
+        <div class="result-steps">
+          <h4>Step-by-Step Solution</h4>
+          <ol id="steps-list"></ol>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  Boole's Rule Numerical Calculator &mdash; PIT Project &mdash; Powered by Flask &amp; MathJax
+</footer>
+
+<script>
+  let currentMode = 'function';
+
+  function showSection(id, el) {
+    document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    el.classList.add('active');
+    if (window.MathJax) MathJax.typesetPromise();
+    return false;
+  }
+
+  function setMode(mode, btn) {
+    currentMode = mode;
+    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('mode-function').style.display = mode === 'function' ? 'block' : 'none';
+    document.getElementById('mode-manual').style.display = mode === 'manual' ? 'block' : 'none';
+    document.getElementById('result-box').classList.remove('show');
+    document.getElementById('error-box').classList.remove('show');
+  }
+
+  async function calculate() {
+    const errorBox = document.getElementById('error-box');
+    const resultBox = document.getElementById('result-box');
+    errorBox.classList.remove('show');
+    resultBox.classList.remove('show');
+
+    let payload = { mode: currentMode };
+
+    if (currentMode === 'function') {
+      const func = document.getElementById('func').value.trim();
+      const a = document.getElementById('a').value.trim();
+      const b = document.getElementById('b').value.trim();
+      if (!func || a === '' || b === '') {
+        showError('Please fill in all fields.'); return;
+      }
+      payload.function = func;
+      payload.a = a;
+      payload.b = b;
+    } else {
+      const h = document.getElementById('h').value.trim();
+      if (!h) { showError('Please enter step size h.'); return; }
+      payload.h = h;
+      for (let i = 0; i < 5; i++) {
+        const val = document.getElementById(`f${i}`).value.trim();
+        if (val === '') { showError(`Please enter f${i}.`); return; }
+        payload[`f${i}`] = val;
+      }
+    }
+
+    try {
+      const res = await fetch('/calculate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        document.getElementById('result-value').textContent = '≈ ' + data.result.toFixed(10);
+        const list = document.getElementById('steps-list');
+        list.innerHTML = '';
+        data.steps.forEach(s => {
+          const li = document.createElement('li');
+          li.textContent = s;
+          list.appendChild(li);
+        });
+        resultBox.classList.add('show');
+      } else {
+        showError(data.error)
+      }
+    } catch (e) {
+      showError('Server error: ' + e.message);
+    }
+  }
+
+  function showError(msg) {
+    const box = document.getElementById('error-box');
+    box.textContent = '⚠ ' + msg;
+    box.classList.add('show');
+  }
+</script>
+</body>
+</html>
