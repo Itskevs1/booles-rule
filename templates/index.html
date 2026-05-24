@@ -371,7 +371,8 @@
 
 <header>
   <h1>Boole's Rule</h1>
-  <p>Numerical Integration Calculator — PIT Project</p>
+  <p>Numerical Integration Calculator</p>
+  <p style="margin-top:0.3rem; font-size:0.85rem; color:#4fc3f7; letter-spacing:1px;">Created by John Kevin B. Kilat</p>
 </header>
 
 <nav>
@@ -670,7 +671,7 @@
       const data = await res.json();
 
       if (data.success) {
-        document.getElementById('result-value').textContent = '≈ ' + data.result.toFixed(10);
+        document.getElementById('result-value').textContent = '≈ ' + data.result.toFixed(4);
         const list = document.getElementById('steps-list');
         list.innerHTML = '';
         data.steps.forEach(s => {

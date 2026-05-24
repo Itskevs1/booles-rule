@@ -65,7 +65,7 @@ def calculate():
             steps.append(f"Weighted sum = {' + '.join(weighted)}")
             wsum = sum(coeffs[i] * f_values[i] for i in range(5))
             steps.append(f"Weighted sum = {wsum:.8f}")
-            steps.append(f"Result = (2 × {h:.6f} / 45) × {wsum:.8f} = {result:.10f}")
+            steps.append(f"Result = (2 × {h:.6f} / 45) × {wsum:.8f} = {result:.4f}")
             
             return jsonify({
                 "success": True,
